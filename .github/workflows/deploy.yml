@@ -1,27 +1,20 @@
-# Nombre del workflow
 name: Deploy estático a GitHub Pages
 
 on:
-  # Se ejecuta cuando haces un push a la rama 'main'
   push:
     branches: ["main"]
-
-  # Permite ejecutar este workflow manualmente desde la pestaña Actions
   workflow_dispatch:
 
-# Establece los permisos necesarios para el token de GITHUB_TOKEN
 permissions:
   contents: read
   pages: write
   id-token: write
 
-# Permite solo un deploy simultáneo
 concurrency:
   group: "pages"
   cancel-in-progress: true
 
 jobs:
-  # Job de construcción
   build:
     runs-on: ubuntu-latest
     steps:
@@ -31,14 +24,14 @@ jobs:
       - name: Configurar Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 20
-          cache: 'npm' # Habilita el caché para acelerar las instalaciones
+          node-version: 24 # Actualizado a la versión más reciente
 
       - name: Instalar dependencias
-        run: npm ci # Usa ci para instalaciones limpias y reproducibles
+        # Cambiamos 'npm ci' por 'npm install' porque no tienes package-lock.json en el repo
+        run: npm install 
 
       - name: Construir el proyecto (Build)
-        run: npm run build # Este comando genera la carpeta 'dist'
+        run: npm run build
 
       - name: Configurar Pages
         uses: actions/configure-pages@v4
@@ -46,10 +39,8 @@ jobs:
       - name: Subir artefacto de Pages
         uses: actions/upload-pages-artifact@v3
         with:
-          # Vite genera los archivos estáticos en la carpeta 'dist' por defecto
           path: './dist'
 
-  # Job de deploy
   deploy:
     environment:
       name: github-pages
